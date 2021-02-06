@@ -90,7 +90,7 @@
                 <div class="row">
                     <div class="col col-md-5 textarea">
                         <h3>Plain text</h3>
-                        <textarea class="code plain"></textarea>
+                        <textarea class="form-control code plain"></textarea>
                         <button class="btn btn-sm btn-outline-secondary copy">copy</button>
                     </div>
                     <div class="col col-md-2 col-tools">
@@ -100,7 +100,7 @@
                     </div>
                     <div class="col col-md-5 textarea">
                         <h3>Base64</h3>
-                        <textarea class="code encoded"></textarea>
+                        <textarea class="form-control code encoded"></textarea>
                         <button class="btn btn-sm btn-outline-secondary copy">copy</button>
                     </div>
                 </div>
@@ -109,7 +109,7 @@
                 <div class="row ">
                     <div class="col col-md-5 textarea">
                         <h3>YAML</h3>
-                        <textarea class="code plain"></textarea>
+                        <textarea class="form-control code plain"></textarea>
                         <button class="btn btn-sm btn-outline-secondary copy">copy</button>
                     </div>
                     <div class="col col-md-2 col-tools">
@@ -119,7 +119,7 @@
                     </div>
                     <div class="col col-md-5 textarea">
                         <h3>JSON</h3>
-                        <textarea class="code encoded"></textarea>
+                        <textarea class="form-control code encoded"></textarea>
                         <button class="btn btn-sm btn-outline-secondary copy">copy</button>
                     </div>
                 </div>
@@ -128,7 +128,7 @@
                 <div class="row ">
                     <div class="col col-md-5 textarea">
                         <h3>JWT</h3>
-                        <textarea class="code encoded"></textarea>
+                        <textarea class="form-control code encoded"></textarea>
                         <button class="btn btn-sm btn-outline-secondary copy">copy</button>
                     </div>
                     <div class="col col-md-2 col-tools">
@@ -138,12 +138,12 @@
                     <div class="col col-md-5">
                         <div class="textarea">
                             <h3>Header</h3>
-                            <textarea class="code header small" readonly></textarea>
+                            <textarea class="form-control code header small" readonly></textarea>
                             <button class="btn btn-sm btn-outline-secondary copy">copy</button>
                         </div>
                         <div class="textarea">
                             <h3>Payload</h3>
-                            <textarea class="code payload small" readonly></textarea>
+                            <textarea class="form-control code payload small" readonly></textarea>
                             <button class="btn btn-sm btn-outline-secondary copy">copy</button>
                         </div>
                     </div>
@@ -185,6 +185,7 @@ $(document).ready(function() {
 
     let createEncodeDecodeScope = (scope, encodeCallback, decodeCallback) => {
         let encode = () => {
+            scope.find("textarea").removeClass("is-invalid");
             try {
                 scope.find("textarea.encoded").val("");
                 let content = scope.find("textarea.plain").val();
@@ -194,11 +195,13 @@ $(document).ready(function() {
                 scope.find("textarea.encoded").val(encodeCallback(content));
                 handleFinalize(scope)
             } catch(e) {
+                scope.find("textarea.plain").addClass("is-invalid");
                 handleException(scope, e)   
             }
         }
         
         let decode = () => {
+            scope.find("textarea").removeClass("is-invalid");
             try {
                 scope.find("textarea.plain").val("");
                 let content = scope.find("textarea.encoded").val();
@@ -208,6 +211,7 @@ $(document).ready(function() {
                 scope.find("textarea.plain").val(decodeCallback(content));
                 handleFinalize(scope)
             } catch(e) {
+                scope.find("textarea.encoded").addClass("is-invalid");
                 handleException(scope, e)   
             }
         }
