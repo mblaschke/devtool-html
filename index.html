@@ -13,14 +13,16 @@
 
     <script src="node_modules/node-forge/dist/forge.min.js"></script>
 
-    <script src="node_modules/json-view/example/build/index.js"></script>
-
     <script src="node_modules/moment/min/moment.min.js"></script>
 
     <link href="json-view/dist/jsonview.bundle.css" rel="stylesheet">
     <script src="json-view/dist/jsonview.bundle.js"></script>
 
-<style>
+    <link href="node_modules/prettydiff/css/index.css" rel="stylesheet">
+    <link href="node_modules/prettydiff/css/color_white.css" rel="stylesheet">
+    <script src="node_modules/prettydiff/js/browser.js"></script>
+
+    <style>
         .tab-pane {
             padding: 1rem;
         }
@@ -87,6 +89,16 @@
             right: 1rem;
             max-width: 75%;
         }
+
+        #prettydiff {
+            font-size: 0.8rem;
+        }
+        div#prettydiff * {
+            box-sizing: content-box;
+        }
+        #prettydiff h3 {
+            font-size: 1rem;
+        }
     </style>
 
   </head>
@@ -97,24 +109,30 @@
     <div class="container">
         <div class="exception"></div>
         <ul class="nav nav-tabs" role="tablist" id="convertTab">
-            <li class="nav-item" role="base64">
-                <a class="nav-link active" id="base64-tab" data-bs-toggle="tab" href="#base64" role="tab" aria-controls="base64" aria-selected="true">Base64</a>
+            <li class="nav-item" role="tool-base64">
+                <a class="nav-link active" id="base64-tab" data-bs-toggle="tool-base64" href="#tool-base64" role="tab" aria-controls="tool-base64" aria-selected="true">Base64</a>
             </li>
-            <li class="nav-item" role="jsonyaml">
-                <a class="nav-link" id="jsonyaml-tab" data-bs-toggle="tab" href="#jsonyaml" role="tab" aria-controls="jsonyaml" aria-selected="false">YAML/JSON</a>
+            <li class="nav-item" role="tool-jsonyaml">
+                <a class="nav-link" id="jsonyaml-tab" data-bs-toggle="tool-jsonyaml" href="#tool-jsonyaml" role="tab" aria-controls="tool-jsonyaml" aria-selected="false">YAML/JSON</a>
             </li>
-            <li class="nav-item" role="jwt">
-                <a class="nav-link" id="jwt-tab" data-bs-toggle="tab" href="#jwt" role="tab" aria-controls="jwt" aria-selected="false">JWT</a>
+            <li class="nav-item" role="tool-jwt">
+                <a class="nav-link" id="jwt-tab" data-bs-toggle="tool-jwt" href="#tool-jwt" role="tab" aria-controls="tool-jwt" aria-selected="false">JWT</a>
             </li>
-            <li class="nav-item" role="cert-pem">
-                <a class="nav-link" id="cert-pem-tab" data-bs-toggle="tab" href="#cert-pem" role="tab" aria-controls="cert-pem" aria-selected="false">TLS cert PEM</a>
+            <li class="nav-item" role="tool-cert-pem">
+                <a class="nav-link" id="cert-pem-tab" data-bs-toggle="tool-cert-pem" href="#tool-cert-pem" role="tab" aria-controls="tool-cert-pem" aria-selected="false">TLS cert PEM</a>
             </li>
-            <li class="nav-item" role="time">
-                <a class="nav-link" id="time-tab" data-bs-toggle="time" href="#time" role="tab" aria-controls="time" aria-selected="false">Time</a>
+            <li class="nav-item" role="tool-ime">
+                <a class="nav-link" id="time-tab" data-bs-toggle="tool-time" href="#tool-time" role="tab" aria-controls="tool-time" aria-selected="false">Time</a>
+            </li>
+            <li class="nav-item" role="tool-diff">
+                <a class="nav-link" id="diff-tab" data-bs-toggle="tool-diff" href="#tool-diff" role="tab" aria-controls="tool-diff" aria-selected="false">Diff</a>
+            </li>
+            <li class="nav-item" role="tool-beautify">
+                <a class="nav-link" id="beautify-tab" data-bs-toggle="tool-beautify" href="#tool-beautify" role="tab" aria-controls="tool-beautify" aria-selected="false">Beautify</a>
             </li>
         </ul>
           <div class="tab-content">
-            <div class="tab-pane fade show active" id="base64" role="tabpanel">
+            <div class="tab-pane fade show active" id="tool-base64" role="tabpanel">
                 <div class="row">
                     <div class="col col-md-5 textarea">
                         <legend>Plain text</legend>
@@ -134,7 +152,7 @@
                 </div>
             </div>
 
-            <div class="tab-pane fade" id="jsonyaml" role="tabpanel">
+            <div class="tab-pane fade" id="tool-jsonyaml" role="tabpanel">
                 <div class="row">
                     <div class="col col-md-5 textarea">
                         <legend>YAML</legend>
@@ -160,7 +178,7 @@
                 </div>
             </div>
 
-            <div class="tab-pane fade" id="jwt" role="tabpanel">
+            <div class="tab-pane fade" id="tool-jwt" role="tabpanel">
                 <div class="row">
                     <div class="col col-md-5 textarea">
                         <legend>JWT</legend>
@@ -192,7 +210,7 @@
                 </div>
             </div>
 
-            <div class="tab-pane fade" id="cert-pem" role="tabpanel">
+            <div class="tab-pane fade" id="tool-cert-pem" role="tabpanel">
                 <div class="row">
                     <div class="col col-md-5 textarea">
                         <legend>TLS cert/csr (pem format)</legend>
@@ -216,7 +234,7 @@
                 </div>
             </div>
 
-              <div class="tab-pane fade" id="time" role="tabpanel">
+            <div class="tab-pane fade" id="tool-time" role="tabpanel">
                   <div class="row">
                       <div class="col col-md-5 textarea">
                           <legend>Time</legend>
@@ -243,6 +261,72 @@
                   </div>
               </div>
 
+            <div class="tab-pane fade" id="tool-diff" role="tabpanel">
+                <div class="row">
+                    <div class="col col-md-5 textarea">
+                        <legend>Source #1</legend>
+                        <textarea class="form-control code plain"></textarea>
+                        <button class="btn btn-sm btn-outline-secondary copy">copy</button>
+                    </div>
+                    <div class="col col-md-2 col-tools">
+                        <button class="btn btn-outline-secondary encode">diff</button>
+                        <button class="btn btn-outline-secondary clear">clear</button>
+
+                        <div class="row form-group">
+                            <label for="diffLanguage" class="form-label">Language</label>
+                            <input class="form-control" list="diffLanguageOptions" id="diffLanguage" placeholder="Language">
+                            <datalist id="diffLanguageOptions">
+                                <option value="auto">
+                                <option value="html">
+                                <option value="json">
+                                <option value="javascript">
+                            </datalist>
+                        </div>
+                    </div>
+                    <div class="col col-md-5 textarea">
+                        <legend>Source #2</legend>
+                        <textarea class="form-control code encoded"></textarea>
+                        <button class="btn btn-sm btn-outline-secondary copy">copy</button>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col col-md-12 textarea">
+                        <legend>Diff</legend>
+                        <div class="dump plain white" id="prettydiff"></div>
+                    </div>
+                </div>
+              </div>
+
+
+              <div class="tab-pane fade" id="tool-beautify" role="tabpanel">
+                  <div class="row">
+                      <div class="col col-md-5 textarea">
+                          <legend>Source</legend>
+                          <textarea class="form-control code plain"></textarea>
+                          <button class="btn btn-sm btn-outline-secondary copy">copy</button>
+                      </div>
+                      <div class="col col-md-2 col-tools">
+                          <button class="btn btn-outline-secondary encode">&rarr;</button>
+                          <button class="btn btn-outline-secondary clear">clear</button>
+
+                          <div class="row form-group">
+                              <label for="beautifyLanguage" class="form-label">Language</label>
+                              <input class="form-control" list="beautifyLanguageOptions" id="beautifyLanguage" placeholder="Language">
+                              <datalist id="beautifyLanguageOptions">
+                                  <option value="auto">
+                                  <option value="html">
+                                  <option value="json">
+                                  <option value="javascript">
+                              </datalist>
+                          </div>
+                      </div>
+                      <div class="col col-md-5 textarea">
+                          <legend>Beautify</legend>
+                          <textarea class="form-control code encoded" readonly></textarea>
+                          <button class="btn btn-sm btn-outline-secondary copy">copy</button>
+                      </div>
+                  </div>
+              </div>
 
 
           </div>
@@ -307,13 +391,16 @@ $(document).ready(function() {
 
         let encode = () => {
             try {
-                scope.find(".encoded:input").val("");
                 let content = scope.find(".plain:input").val();
                 if (content === "") {
                     clear();
                     return
                 }
-                scope.find(".encoded:input").val(encodeCallback(content));
+                content = encodeCallback(content);
+                console.log(content)
+                if (content !== false) {
+                    scope.find(".encoded:input").val(content);
+                }
                 handleFinalize(scope)
             } catch(e) {
                 scope.find(".plain:input").addClass("is-invalid");
@@ -323,13 +410,15 @@ $(document).ready(function() {
         
         let decode = () => {
             try {
-                scope.find(".plain:input").val("");
                 let content = scope.find(".encoded:input").val();
                 if (content === "") {
                     clear();
                     return
                 }
-                scope.find(".plain:input").val(decodeCallback(content));
+                content = decodeCallback(content);
+                if (content !== false) {
+                    scope.find(".plain:input").val(content);
+                }
                 handleFinalize(scope)
             } catch(e) {
                 scope.find(".encoded:input").addClass("is-invalid");
@@ -351,8 +440,9 @@ $(document).ready(function() {
         scope.find("button.copy").on("click", copyToClipboard);
     };
 
+    let base64Scope = $("#tool-base64");
     createEncodeDecodeScope(
-        $("#base64"),
+        base64Scope,
         // encode
         (val) => {
             return btoa(val);
@@ -363,8 +453,9 @@ $(document).ready(function() {
         }
     );
 
+    let jsonyamlScope = $("#tool-jsonyaml");
     createEncodeDecodeScope(
-        $("#jsonyaml"),
+        jsonyamlScope,
         // encode
         (val) => {
             let ret = jsyaml.load(val, "utf8");
@@ -379,7 +470,7 @@ $(document).ready(function() {
         }
     );
 
-    let jwtScope = $("#jwt");
+    let jwtScope = $("#tool-jwt");
     createEncodeDecodeScope(
         jwtScope,
         // encode
@@ -398,8 +489,9 @@ $(document).ready(function() {
         }
     );
 
+    let certPemScope = $("#tool-cert-pem");
     createEncodeDecodeScope(
-        $("#cert-pem"),
+        certPemScope,
         // encode
         (val) => {
             throw "not implemented"
@@ -501,7 +593,7 @@ $(document).ready(function() {
 
 
 
-    let timeScope = $("#time");
+    let timeScope = $("#tool-time");
     createEncodeDecodeScope(
         timeScope,
         // encode
@@ -561,6 +653,62 @@ $(document).ready(function() {
             jsonViewDump("#time-summary-local", createTimestampObject(parsedTime), false);
             jsonViewDump("#time-summary-utc", createTimestampObject(parsedTime.utc()), false);
             return val;
+        }
+    );
+
+    let diffScope = $("#tool-diff");
+    let handleDiff = (val) => {
+        let source1 = ""+diffScope.find(".plain:input").val();
+        let source2 = ""+diffScope.find(".encoded:input").val();
+
+
+        let language = beautifyScope.find("#diffLanguage").val();
+        language = language !== "" ? language : "auto";
+
+        let prettydiff = window.prettydiff
+        let options    = window.prettydiff.options;
+        options.api = "dom";
+        options.diff_format = "html";
+        options.language = language;
+        options.lexer = "auto";
+        options.mode = "diff";
+        options.source = source1;
+        options.diff = source2;
+
+        diffScope.find("#prettydiff").html(prettydiff());
+        return false;
+    }
+    createEncodeDecodeScope(
+        diffScope,
+        // encode
+        handleDiff,
+        // decode
+        handleDiff
+    );
+
+
+    let beautifyScope = $("#tool-beautify");
+    createEncodeDecodeScope(
+        beautifyScope,
+        // encode
+        (val) => {
+            let prettydiff = window.prettydiff
+            let options    = window.prettydiff.options;
+
+            let language = beautifyScope.find("#beautifyLanguage").val();
+            language = language !== "" ? language : "auto";
+
+            //options.api = "dom";
+            options.language = language;
+            options.lexer = "auto";
+            options.mode = "beautify";
+            options.source = val;
+
+            return prettydiff();
+        },
+        // decode
+        (val) => {
+            throw "not implemented"
         }
     );
 
