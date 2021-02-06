@@ -62,7 +62,7 @@
             position: absolute;
             top: 1rem;
             right: 1rem;
-            max-width: 50%;
+            max-width: 75%;
         }
     </style>
 
@@ -170,8 +170,12 @@ $(document).ready(function() {
         $('html,body').scrollTop(scrollmem);
     });
 
-    let handleFinalize = (scope) => {
+    let clearException = (scope) => {
         $(".exception").html("");
+    }
+    let handleFinalize = (scope) => {
+        clearException(scope);
+        scope.find("textarea").removeClass("is-invalid");
     }
     let handleException = (scope, message) => {
         // escape
@@ -183,13 +187,20 @@ $(document).ready(function() {
         handleFinalize(null);
     });
 
+
     let createEncodeDecodeScope = (scope, encodeCallback, decodeCallback) => {
-        let encode = () => {
+        let clear = (event) => {
+            clearException(scope);
             scope.find("textarea").removeClass("is-invalid");
+            scope.find("textarea").val("");
+        }
+
+        let encode = () => {
             try {
                 scope.find("textarea.encoded").val("");
                 let content = scope.find("textarea.plain").val();
                 if (content == "") {
+                    clear();
                     return
                 }
                 scope.find("textarea.encoded").val(encodeCallback(content));
@@ -201,11 +212,11 @@ $(document).ready(function() {
         }
         
         let decode = () => {
-            scope.find("textarea").removeClass("is-invalid");
             try {
                 scope.find("textarea.plain").val("");
                 let content = scope.find("textarea.encoded").val();
                 if (content == "") {
+                    clear();
                     return
                 }
                 scope.find("textarea.plain").val(decodeCallback(content));
@@ -222,10 +233,6 @@ $(document).ready(function() {
             document.execCommand("copy");
         }
 
-        let clear = (event) => {
-            scope.find("textarea").val("");
-        }
-
         scope.find("button.clear").on("click", clear);
         scope.find("button.encode").on("click", encode);
         scope.find("button.decode").on("click", decode);
@@ -233,7 +240,6 @@ $(document).ready(function() {
         scope.find("textarea.encoded").on("change", decode);
 
         scope.find("button.copy").on("click", copyToClipboard);
-
     };
 
     createEncodeDecodeScope(
