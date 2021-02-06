@@ -8,8 +8,17 @@
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
-    <script src="js-yaml.min.js"></script>
-    <style>
+
+    <script src="node_modules/js-yaml/dist/js-yaml.min.js"></script>
+
+    <script src="node_modules/node-forge/dist/forge.min.js"></script>
+
+    <script src="node_modules/json-view/example/build/index.js"></script>
+
+    <link href="json-view/dist/jsonview.bundle.css" rel="stylesheet">
+    <script src="json-view/dist/jsonview.bundle.js"></script>
+
+<style>
         .tab-pane {
             padding: 1rem;
         }
@@ -17,6 +26,7 @@
         textarea.code {
             width: 100%;
             min-height: 35rem;
+            font-size: 0.8rem;
         }
         textarea.code.header {
             min-height: 8rem;
@@ -79,16 +89,19 @@
         <div class="exception"></div>
         <ul class="nav nav-tabs" role="tablist" id="convertTab">
             <li class="nav-item" role="base64">
-              <a class="nav-link active" id="base64-tab" data-bs-toggle="tab" href="#base64" role="tab" aria-controls="base64" aria-selected="true">Base64</a>
+                <a class="nav-link active" id="base64-tab" data-bs-toggle="tab" href="#base64" role="tab" aria-controls="base64" aria-selected="true">Base64</a>
             </li>
             <li class="nav-item" role="jsonyaml">
-              <a class="nav-link" id="jsonyaml-tab" data-bs-toggle="tab" href="#jsonyaml" role="tab" aria-controls="jsonyaml" aria-selected="false">YAML/JSON</a>
+                <a class="nav-link" id="jsonyaml-tab" data-bs-toggle="tab" href="#jsonyaml" role="tab" aria-controls="jsonyaml" aria-selected="false">YAML/JSON</a>
             </li>
             <li class="nav-item" role="jwt">
                 <a class="nav-link" id="jwt-tab" data-bs-toggle="tab" href="#jwt" role="tab" aria-controls="jwt" aria-selected="false">JWT</a>
-              </li>
-            </ul>
-          <div class="tab-content" id="myTabContent">
+            </li>
+            <li class="nav-item" role="cert-pem">
+                <a class="nav-link" id="cert-pem-tab" data-bs-toggle="tab" href="#cert-pem" role="tab" aria-controls="cert-pem" aria-selected="false">TLS cert PEM</a>
+            </li>
+        </ul>
+          <div class="tab-content">
             <div class="tab-pane fade show active" id="base64" role="tabpanel">
                 <div class="row">
                     <div class="col col-md-5 textarea">
@@ -108,6 +121,7 @@
                     </div>
                 </div>
             </div>
+
             <div class="tab-pane fade" id="jsonyaml" role="tabpanel">
                 <div class="row ">
                     <div class="col col-md-5 textarea">
@@ -127,6 +141,7 @@
                     </div>
                 </div>
             </div>
+
             <div class="tab-pane fade" id="jwt" role="tabpanel">
                 <div class="row ">
                     <div class="col col-md-5 textarea">
@@ -152,6 +167,27 @@
                     </div>
                 </div>
             </div>
+
+            <div class="tab-pane fade" id="cert-pem" role="tabpanel">
+                <div class="row ">
+                    <div class="col col-md-5 textarea">
+                        <legend>TLS cert (pem format)</legend>
+                        <textarea class="form-control code encoded"></textarea>
+                        <button class="btn btn-sm btn-outline-secondary copy">copy</button>
+                    </div>
+                    <div class="col col-md-2 col-tools">
+                        <button class="btn btn-outline-secondary decode">&rarr;</button>
+                        <button class="btn btn-outline-secondary clear">clear</button>
+                    </div>
+                    <div class="col col-md-5 textarea">
+                        <legend>Dump</legend>
+                        <div class="dump plain" id="cert-pem-dump"></div>
+                        <button class="btn btn-sm btn-outline-secondary copy">copy</button>
+                    </div>
+                </div>
+            </div>
+
+
           </div>
 
     </div>
@@ -190,12 +226,22 @@ $(document).ready(function() {
         handleFinalize(null);
     });
 
+    let jsonViewDump = (selector, data) => {
+        // remove functions and sanitze
+        data = JSON.stringify(data, null, 2);
+        data = JSON.parse(data);
+
+        $(selector).html("");
+        let tree = JsonView.renderJSON(data, document.querySelector(selector));
+        JsonView.expandChildren(tree);
+    }
 
     let createEncodeDecodeScope = (scope, encodeCallback, decodeCallback) => {
         let clear = (event) => {
             clearException(scope);
             scope.find("textarea").removeClass("is-invalid");
             scope.find("textarea").val("");
+            scope.find(".dump").html("");
         }
 
         let encode = () => {
@@ -284,6 +330,25 @@ $(document).ready(function() {
 
             $("#jwt").find("textarea.header").val(JSON.stringify(header, null, 2));
             $("#jwt").find("textarea.payload").val(JSON.stringify(payload, null, 2));
+            return null;
+        }
+    );
+
+    createEncodeDecodeScope(
+        $("#cert-pem"),
+        // encode
+        (val) => {
+            throw "not implemented"
+        },
+        // decode
+        (val) => {
+            var pki = forge.pki;
+            var ret = pki.certificateFromPem(val);
+            delete ret.signature;
+            delete ret.tbsCertificate;
+            delete ret.publicKey;
+            delete ret.siginfo;
+            jsonViewDump("#cert-pem-dump", ret);
             return null;
         }
     );
