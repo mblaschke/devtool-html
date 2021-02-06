@@ -15,6 +15,8 @@
 
     <script src="node_modules/json-view/example/build/index.js"></script>
 
+    <script src="node_modules/moment/min/moment.min.js"></script>
+
     <link href="json-view/dist/jsonview.bundle.css" rel="stylesheet">
     <script src="json-view/dist/jsonview.bundle.js"></script>
 
@@ -40,6 +42,7 @@
             min-height: 1rem;
             background-color: #fff;
             border: 1px dashed #777;
+            padding: 1rem 0.5rem;
         }
 
         button.encode,
@@ -106,6 +109,9 @@
             <li class="nav-item" role="cert-pem">
                 <a class="nav-link" id="cert-pem-tab" data-bs-toggle="tab" href="#cert-pem" role="tab" aria-controls="cert-pem" aria-selected="false">TLS cert PEM</a>
             </li>
+            <li class="nav-item" role="time">
+                <a class="nav-link" id="time-tab" data-bs-toggle="time" href="#time" role="tab" aria-controls="time" aria-selected="false">Time</a>
+            </li>
         </ul>
           <div class="tab-content">
             <div class="tab-pane fade show active" id="base64" role="tabpanel">
@@ -129,7 +135,7 @@
             </div>
 
             <div class="tab-pane fade" id="jsonyaml" role="tabpanel">
-                <div class="row ">
+                <div class="row">
                     <div class="col col-md-5 textarea">
                         <legend>YAML</legend>
                         <textarea class="form-control code plain"></textarea>
@@ -149,7 +155,7 @@
             </div>
 
             <div class="tab-pane fade" id="jwt" role="tabpanel">
-                <div class="row ">
+                <div class="row">
                     <div class="col col-md-5 textarea">
                         <legend>JWT</legend>
                         <textarea class="form-control code encoded"></textarea>
@@ -175,7 +181,7 @@
             </div>
 
             <div class="tab-pane fade" id="cert-pem" role="tabpanel">
-                <div class="row ">
+                <div class="row">
                     <div class="col col-md-5 textarea">
                         <legend>TLS cert (pem format)</legend>
                         <textarea class="form-control code encoded"></textarea>
@@ -188,11 +194,33 @@
                     <div class="col col-md-5 textarea">
                         <legend>Summary</legend>
                         <div class="dump plain" id="cert-pem-dump-summary"></div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col col-md-12 textarea">
                         <legend>PEM dump</legend>
                         <div class="dump plain" id="cert-pem-dump-pem"></div>
                     </div>
                 </div>
             </div>
+
+              <div class="tab-pane fade" id="time" role="tabpanel">
+                  <div class="row">
+                      <div class="col col-md-5 textarea">
+                          <legend>Time</legend>
+                          <input value="" class="form-control code encoded">
+                      </div>
+                      <div class="col col-md-2 col-tools">
+                          <button class="btn btn-outline-secondary decode">&rarr;</button>
+                          <button class="btn btn-outline-secondary clear">clear</button>
+                      </div>
+                      <div class="col col-md-5 textarea">
+                          <legend>Information</legend>
+                          <div class="dump plain" id="time-summary"></div>
+                      </div>
+                  </div>
+              </div>
+
 
 
           </div>
@@ -216,17 +244,21 @@ $(document).ready(function() {
         $('html,body').scrollTop(scrollmem);
     });
 
+    let htmlEscape = (val) => {
+        ret = $("<div>").text(val).html();
+        ret = ret.replace(/\n/g, "<br>");
+        return ret;
+    }
+
     let clearException = (scope) => {
         $(".exception").html("");
     }
     let handleFinalize = (scope) => {
         clearException(scope);
-        scope.find("textarea").removeClass("is-invalid");
+        scope.find(":input").removeClass("is-invalid");
     }
     let handleException = (scope, message) => {
-        // escape
-        message = $("<div>").text(message).html();
-        $(".exception").html('<div class="alert alert-danger alert-dismissible fade show" role="alert">' + message + '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>')
+        $(".exception").html('<div class="alert alert-danger alert-dismissible fade show" role="alert">' + htmlEscape(message) + '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>')
     }
 
     $(".exception").on("click", ".alert-dismissible button.btn-close", () => {
@@ -246,54 +278,53 @@ $(document).ready(function() {
     let createEncodeDecodeScope = (scope, encodeCallback, decodeCallback) => {
         let clear = (event) => {
             clearException(scope);
-            scope.find("textarea").removeClass("is-invalid");
-            scope.find("textarea").val("");
+            scope.find(":input").removeClass("is-invalid");
+            scope.find(":input").val("");
             scope.find(".dump").html("");
         }
 
         let encode = () => {
             try {
-                scope.find("textarea.encoded").val("");
-                let content = scope.find("textarea.plain").val();
-                if (content == "") {
+                scope.find(".encoded:input").val("");
+                let content = scope.find(".plain:input").val();
+                if (content === "") {
                     clear();
                     return
                 }
-                scope.find("textarea.encoded").val(encodeCallback(content));
+                scope.find(".encoded:input").val(encodeCallback(content));
                 handleFinalize(scope)
             } catch(e) {
-                scope.find("textarea.plain").addClass("is-invalid");
+                scope.find(".plain:input").addClass("is-invalid");
                 handleException(scope, e)   
             }
         }
         
         let decode = () => {
             try {
-                scope.find("textarea.plain").val("");
-                let content = scope.find("textarea.encoded").val();
-                if (content == "") {
+                scope.find(".plain:input").val("");
+                let content = scope.find(".encoded:input").val();
+                if (content === "") {
                     clear();
                     return
                 }
-                scope.find("textarea.plain").val(decodeCallback(content));
+                scope.find(".plain:input").val(decodeCallback(content));
                 handleFinalize(scope)
             } catch(e) {
-                scope.find("textarea.encoded").addClass("is-invalid");
+                scope.find(".encoded:input").addClass("is-invalid");
                 handleException(scope, e)   
             }
         }
 
         let copyToClipboard = (event) => {
-            let textarea = $(event.target).parent().find("textarea");
-            textarea.select();
+            $(event.target).parent().find(":input").select();
             document.execCommand("copy");
         }
 
         scope.find("button.clear").on("click", clear);
         scope.find("button.encode").on("click", encode);
         scope.find("button.decode").on("click", decode);
-        scope.find("textarea.plain").on("change", encode);
-        scope.find("textarea.encoded").on("change", decode);
+        scope.find(".plain:input").on("change", encode);
+        scope.find(".encoded:input").on("change", decode);
 
         scope.find("button.copy").on("click", copyToClipboard);
     };
@@ -324,8 +355,9 @@ $(document).ready(function() {
         }
     );
 
+    let jwtScope = $("#jwt");
     createEncodeDecodeScope(
-        $("#jwt"),
+        jwtScope,
         // encode
         (val) => {
             throw "not implemented"
@@ -335,8 +367,8 @@ $(document).ready(function() {
             let header = JSON.parse(atob(val.split('.')[0]));
             let payload = JSON.parse(atob(val.split('.')[1]));
 
-            $("#jwt").find("textarea.header").val(JSON.stringify(header, null, 2));
-            $("#jwt").find("textarea.payload").val(JSON.stringify(payload, null, 2));
+            jwtScope.find("textarea.header").val(JSON.stringify(header, null, 2));
+            jwtScope.find("textarea.payload").val(JSON.stringify(payload, null, 2));
             return null;
         }
     );
@@ -349,20 +381,47 @@ $(document).ready(function() {
         },
         // decode
         (val) => {
-            var pki = forge.pki;
-            var pem = pki.certificateFromPem(val);
-            delete pem.signature;
-            delete pem.tbsCertificate;
-            delete pem.publicKey;
-            delete pem.siginfo;
+            let pki = forge.pki;
+            let pem = null;
+            let pemType = "unknown";
+            try {
+                pem = pki.certificateFromPem(val);
+                pemType = "certificate";
+            } catch (certException) {
+                try {
+                    pem = pki.certificationRequestFromPem(val);
+                    pemType = "certificate signing request";
+                } catch (csrException) {
+                    let message = "unable to detect PEM type:"
+                    message += "\n\n"
+                    message += "cert exception:\n"+certException+"\n\n";
+                    message += "csr exception:\n"+csrException;
+                    throw message
+                }
+            }
+
+            pem.signature = "-- TRUNCATED --";
+            pem.tbsCertificate = "-- TRUNCATED --";
+            pem.publicKey = "-- TRUNCATED --";
+            pem.siginfo = "-- TRUNCATED --";
 
             let summary = {
-                issuer: {},
+                type: pemType,
+                signature: "unknown",
                 subject: {},
+                issuer: {},
                 san: [],
                 validity: pem.validity,
-                signature: "unknown"
             }
+
+            if (summary.validity.notBefore) {
+                summary.validity.notBeforeDuration = moment(summary.validity.notBefore).fromNow();
+            }
+
+            if (summary.validity.notAfter) {
+                summary.validity.notAfterDuration = moment(summary.validity.notAfter).fromNow();
+            }
+
             if (pem.issuer && pem.issuer.attributes) {
                 $.each(pem.issuer.attributes, (key, attribute) => {
                     summary.issuer[attribute.shortName] = attribute.value;
@@ -371,7 +430,15 @@ $(document).ready(function() {
 
             if (pem.subject && pem.subject.attributes) {
                 $.each(pem.subject.attributes, (key, attribute) => {
-                    summary.subject[attribute.shortName] = attribute.value;
+                    switch (attribute.name) {
+                        case "subjectAltName":
+                            // SAN from CSR
+                            summary.san.push(attribute.value.split("=")[1]);
+                            break;
+                        default:
+                            summary.subject[attribute.shortName] = attribute.value;
+                            break;
+                    }
                 });
             }
             if (pem.extensions) {
@@ -401,12 +468,74 @@ $(document).ready(function() {
                 summary.signature = signatureMap[pem.signatureOid]
             }
 
-
             jsonViewDump("#cert-pem-dump-summary", summary, true);
             jsonViewDump("#cert-pem-dump-pem", pem, false);
             return null;
         }
     );
+
+
+
+    let timeScope = $("#time");
+    createEncodeDecodeScope(
+        timeScope,
+        // encode
+        (val) => {
+            throw "not implemented"
+        },
+        // decode
+        (val) => {
+            let parsedTime = null;
+            if (val === ""+parseInt(val, 10)) {
+                parsedTime = moment.unix(parseInt(val));
+            } else {
+                parsedTime = moment(val);
+            }
+
+            if (!parsedTime.isValid()) {
+                throw "momentjs: unable to parse time";
+            }
+
+            let dump = {
+                value: parsedTime,
+                duration: parsedTime.fromNow(),
+                unixTimestamp: parsedTime.unix(),
+                local: {
+                    timestamp: {
+                        date: parsedTime.format("YYYY-MM-DD"),
+                        time: parsedTime.format("hh:mm:ss"),
+                    },
+                    timezone: {
+                        zone: parsedTime.format("zz"),
+                        offset: parsedTime.format("Z"),
+                    },
+                },
+                utc: {
+                    timestamp: {
+                        date: parsedTime.utc().format("YYYY-MM-DD"),
+                        time: parsedTime.utc().format("hh:mm:ss"),
+                    },
+                    timezone: {
+                        zone: parsedTime.utc().format("zz"),
+                        offset: parsedTime.utc().format("Z"),
+                    },
+                },
+                difference: {
+                    years: parsedTime.diff(moment(), "years", true),
+                    months: parsedTime.diff(moment(), "months", true),
+                    weeks: parsedTime.diff(moment(), "weeks", true),
+                    days: parsedTime.diff(moment(), "days", true),
+                    hours: parsedTime.diff(moment(), "hours", true),
+                    minutes: parsedTime.diff(moment(), "minutes", true),
+                    seconds: parsedTime.diff(moment(), "seconds"),
+                },
+            }
+
+            jsonViewDump("#time-summary", dump, false);
+            return val;
+        }
+    );
+
 });
 </script>
       
