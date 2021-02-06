@@ -152,6 +152,12 @@
                         <button class="btn btn-sm btn-outline-secondary copy">copy</button>
                     </div>
                 </div>
+                <div class="row">
+                    <div class="col col-md-12 textarea">
+                        <legend>Dump</legend>
+                        <div class="dump plain" id="jsonyaml-summary"></div>
+                    </div>
+                </div>
             </div>
 
             <div class="tab-pane fade" id="jwt" role="tabpanel">
@@ -176,6 +182,12 @@
                             <textarea class="form-control code payload small" readonly></textarea>
                             <button class="btn btn-sm btn-outline-secondary copy">copy</button>
                         </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col col-md-12 textarea">
+                        <legend>Dump</legend>
+                        <div class="dump plain" id="jwt-summary"></div>
                     </div>
                 </div>
             </div>
@@ -356,11 +368,13 @@ $(document).ready(function() {
         // encode
         (val) => {
             let ret = jsyaml.load(val, "utf8");
+            jsonViewDump("#jsonyaml-summary", ret, false);
             return JSON.stringify(ret, null, 2);
         },
         // decode
         (val) => {
             let ret = $.parseJSON(val);
+            jsonViewDump("#jsonyaml-summary", ret, false);
             return jsyaml.dump(ret);
         }
     );
@@ -379,6 +393,7 @@ $(document).ready(function() {
 
             jwtScope.find("textarea.header").val(JSON.stringify(header, null, 2));
             jwtScope.find("textarea.payload").val(JSON.stringify(payload, null, 2));
+            jsonViewDump("#jwt-summary", {header:header,payload:payload}, false);
             return null;
         }
     );
