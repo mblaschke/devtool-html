@@ -180,8 +180,10 @@
                         <button class="btn btn-outline-secondary clear">clear</button>
                     </div>
                     <div class="col col-md-5 textarea">
-                        <legend>Dump</legend>
-                        <div class="dump plain" id="cert-pem-dump"></div>
+                        <legend>Summary</legend>
+                        <div class="dump plain" id="cert-pem-dump-summary"></div>
+                        <legend>PEM dump</legend>
+                        <div class="dump plain" id="cert-pem-dump-pem"></div>
                     </div>
                 </div>
             </div>
@@ -342,12 +344,60 @@ $(document).ready(function() {
         // decode
         (val) => {
             var pki = forge.pki;
-            var ret = pki.certificateFromPem(val);
-            delete ret.signature;
-            delete ret.tbsCertificate;
-            delete ret.publicKey;
-            delete ret.siginfo;
-            jsonViewDump("#cert-pem-dump", ret);
+            var pem = pki.certificateFromPem(val);
+            delete pem.signature;
+            delete pem.tbsCertificate;
+            delete pem.publicKey;
+            delete pem.siginfo;
+
+            let summary = {
+                issuer: {},
+                subject: {},
+                san: [],
+                validity: pem.validity,
+                signature: "unknown"
+            }
+            if (pem.issuer && pem.issuer.attributes) {
+                $.each(pem.issuer.attributes, (key, attribute) => {
+                    summary.issuer[attribute.shortName] = attribute.value;
+                });
+            }
+
+            if (pem.subject && pem.subject.attributes) {
+                $.each(pem.subject.attributes, (key, attribute) => {
+                    summary.subject[attribute.shortName] = attribute.value;
+                });
+            }
+            if (pem.extensions) {
+                $.each(pem.extensions, (key, attribute) => {
+                    if (attribute.name === "subjectAltName") {
+                        $.each(attribute.altNames, (key, san) => {
+                            summary.san.push(san.value);
+                        });
+                    }
+                });
+            }
+
+            let signatureMap = {
+                "1.2.840.113549.1.1.5": "sha-1WithRSAEncryption",
+                "1.2.840.113549.1.1.14": "sha-224WithRSAEncryption",
+                "1.2.840.113549.1.1.11": "sha-256WithRSAEncryption",
+                "1.2.840.113549.1.1.12": "sha-384WithRSAEncryption",
+                "1.2.840.113549.1.1.13": "sha-512WithRSAEncryption",
+                "1.2.840.10040.4.3": "id-dsa-with-sha1",
+                "1.2.840.10045.4.1": "ecdsa-with-sha1",
+                "1.2.840.10045.4.3.1": "ecdsa-with-sha224",
+                "1.2.840.10045.4.3.2": "ecdsa-with-sha256",
+                "1.2.840.10045.4.3.3": "ecdsa-with-sha384",
+                "1.2.840.10045.4.3.4": "ecdsa-with-sha512",
+            }
+            if (pem.signatureOid && signatureMap[pem.signatureOid]) {
+                summary.signature = signatureMap[pem.signatureOid]
+            }
+
+
+            jsonViewDump("#cert-pem-dump-summary", summary, true);
+            jsonViewDump("#cert-pem-dump-pem", pem, false);
             return null;
         }
     );
