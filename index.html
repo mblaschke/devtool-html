@@ -215,8 +215,18 @@
                           <button class="btn btn-outline-secondary clear">clear</button>
                       </div>
                       <div class="col col-md-5 textarea">
-                          <legend>Information</legend>
+                          <legend>Time</legend>
                           <div class="dump plain" id="time-summary"></div>
+                      </div>
+                  </div>
+                  <div class="row">
+                      <div class="col col-md-6 textarea">
+                          <legend>Time (local)</legend>
+                          <div class="dump plain" id="time-summary-local"></div>
+                      </div>
+                      <div class="col col-md-6 textarea">
+                          <legend>Time (utc)</legend>
+                          <div class="dump plain" id="time-summary-utc"></div>
                       </div>
                   </div>
               </div>
@@ -496,42 +506,45 @@ $(document).ready(function() {
                 throw "momentjs: unable to parse time";
             }
 
+            let createTimestampObject = (time) => {
+                return {
+                    date: time.format("YYYY-MM-DD"),
+                    time: time.format("HH:mm:ss"),
+                    day: time.format("dddd"),
+                    dayIso: time.isoWeekday(),
+                    weekOfYear: time.week(),
+                    weekOfYearIso: time.isoWeek(),
+                    quarter: time.quarter(),
+                    isDST: time.isDST(),
+                    isLeapYear: time.isLeapYear(),
+                    timezone: {
+                        zone: time.format("zz"),
+                        offset: time.format("Z"),
+                    },
+                };
+            }
+
+            let now = moment();
+            
             let dump = {
+                text: parsedTime.toString(),
                 value: parsedTime,
                 duration: parsedTime.fromNow(),
                 unixTimestamp: parsedTime.unix(),
-                local: {
-                    timestamp: {
-                        date: parsedTime.format("YYYY-MM-DD"),
-                        time: parsedTime.format("hh:mm:ss"),
-                    },
-                    timezone: {
-                        zone: parsedTime.format("zz"),
-                        offset: parsedTime.format("Z"),
-                    },
-                },
-                utc: {
-                    timestamp: {
-                        date: parsedTime.utc().format("YYYY-MM-DD"),
-                        time: parsedTime.utc().format("hh:mm:ss"),
-                    },
-                    timezone: {
-                        zone: parsedTime.utc().format("zz"),
-                        offset: parsedTime.utc().format("Z"),
-                    },
-                },
                 difference: {
-                    years: parsedTime.diff(moment(), "years", true),
-                    months: parsedTime.diff(moment(), "months", true),
-                    weeks: parsedTime.diff(moment(), "weeks", true),
-                    days: parsedTime.diff(moment(), "days", true),
-                    hours: parsedTime.diff(moment(), "hours", true),
-                    minutes: parsedTime.diff(moment(), "minutes", true),
-                    seconds: parsedTime.diff(moment(), "seconds"),
+                    years: parsedTime.diff(now, "years", true),
+                    months: parsedTime.diff(now, "months", true),
+                    weeks: parsedTime.diff(now, "weeks", true),
+                    days: parsedTime.diff(now, "days", true),
+                    hours: parsedTime.diff(now, "hours", true),
+                    minutes: parsedTime.diff(now, "minutes", true),
+                    seconds: parsedTime.diff(now, "seconds"),
                 },
             }
 
             jsonViewDump("#time-summary", dump, false);
+            jsonViewDump("#time-summary-local", createTimestampObject(parsedTime), false);
+            jsonViewDump("#time-summary-utc", createTimestampObject(parsedTime.utc()), false);
             return val;
         }
     );
