@@ -10,6 +10,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
     <script src="js-yaml.min.js"></script>
     <style>
+        .tab-pane {
+            padding: 1rem;
+        }
+
         textarea.code {
             width: 100%;
             min-height: 35rem;
@@ -73,7 +77,6 @@
   <div class="album py-5 bg-light">
     <div class="container">
         <div class="exception"></div>
-
         <ul class="nav nav-tabs" role="tablist" id="convertTab">
             <li class="nav-item" role="base64">
               <a class="nav-link active" id="base64-tab" data-bs-toggle="tab" href="#base64" role="tab" aria-controls="base64" aria-selected="true">Base64</a>
@@ -89,7 +92,7 @@
             <div class="tab-pane fade show active" id="base64" role="tabpanel">
                 <div class="row">
                     <div class="col col-md-5 textarea">
-                        <h3>Plain text</h3>
+                        <legend>Plain text</legend>
                         <textarea class="form-control code plain"></textarea>
                         <button class="btn btn-sm btn-outline-secondary copy">copy</button>
                     </div>
@@ -99,7 +102,7 @@
                         <button class="btn btn-outline-secondary clear">clear</button>
                     </div>
                     <div class="col col-md-5 textarea">
-                        <h3>Base64</h3>
+                        <legend>Base64</legend>
                         <textarea class="form-control code encoded"></textarea>
                         <button class="btn btn-sm btn-outline-secondary copy">copy</button>
                     </div>
@@ -108,7 +111,7 @@
             <div class="tab-pane fade" id="jsonyaml" role="tabpanel">
                 <div class="row ">
                     <div class="col col-md-5 textarea">
-                        <h3>YAML</h3>
+                        <legend>YAML</legend>
                         <textarea class="form-control code plain"></textarea>
                         <button class="btn btn-sm btn-outline-secondary copy">copy</button>
                     </div>
@@ -118,7 +121,7 @@
                         <button class="btn btn-outline-secondary clear">clear</button>
                     </div>
                     <div class="col col-md-5 textarea">
-                        <h3>JSON</h3>
+                        <legend>JSON</legend>
                         <textarea class="form-control code encoded"></textarea>
                         <button class="btn btn-sm btn-outline-secondary copy">copy</button>
                     </div>
@@ -127,7 +130,7 @@
             <div class="tab-pane fade" id="jwt" role="tabpanel">
                 <div class="row ">
                     <div class="col col-md-5 textarea">
-                        <h3>JWT</h3>
+                        <legend>JWT</legend>
                         <textarea class="form-control code encoded"></textarea>
                         <button class="btn btn-sm btn-outline-secondary copy">copy</button>
                     </div>
@@ -137,12 +140,12 @@
                     </div>
                     <div class="col col-md-5">
                         <div class="textarea">
-                            <h3>Header</h3>
+                            <legend>Header</legend>
                             <textarea class="form-control code header small" readonly></textarea>
                             <button class="btn btn-sm btn-outline-secondary copy">copy</button>
                         </div>
                         <div class="textarea">
-                            <h3>Payload</h3>
+                            <legend>Payload</legend>
                             <textarea class="form-control code payload small" readonly></textarea>
                             <button class="btn btn-sm btn-outline-secondary copy">copy</button>
                         </div>
