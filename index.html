@@ -1,0 +1,284 @@
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Encode/Decode</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+    <script src="js-yaml.min.js"></script>
+    <style>
+        textarea.code {
+            width: 100%;
+            min-height: 35rem;
+        }
+        textarea.code.header {
+            min-height: 8rem;
+        }
+
+        textarea.code.payload {
+            min-height: 25rem;
+        }
+
+        button.encode,
+        button.decode,
+        button.clear {
+            text-align: center;
+            margin: 2rem 0;
+            padding: 1rem 1rem;
+            white-space: nowrap;
+            width: 50%;
+        }
+
+        button.encode,
+        button.decode {
+            font-size: 2rem;
+        }
+
+
+        .col-tools {
+            padding-top: 2rem;
+            text-align: center;
+        }
+
+        .textarea {
+            position: relative;
+        }
+        
+        .textarea button.copy {
+            position: absolute;
+            right: 0;
+            top: 0.25rem;
+        }
+
+        .col.textarea button.copy {
+            right: calc(var(--bs-gutter-x)/ 2);;
+        }
+
+
+
+
+        .exception {
+            z-index: 9999999999;
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            max-width: 50%;
+        }
+    </style>
+
+  </head>
+  <body>
+    
+<main>
+  <div class="album py-5 bg-light">
+    <div class="container">
+        <div class="exception"></div>
+
+        <ul class="nav nav-tabs" role="tablist" id="convertTab">
+            <li class="nav-item" role="base64">
+              <a class="nav-link active" id="base64-tab" data-bs-toggle="tab" href="#base64" role="tab" aria-controls="base64" aria-selected="true">Base64</a>
+            </li>
+            <li class="nav-item" role="jsonyaml">
+              <a class="nav-link" id="jsonyaml-tab" data-bs-toggle="tab" href="#jsonyaml" role="tab" aria-controls="jsonyaml" aria-selected="false">YAML/JSON</a>
+            </li>
+            <li class="nav-item" role="jwt">
+                <a class="nav-link" id="jwt-tab" data-bs-toggle="tab" href="#jwt" role="tab" aria-controls="jwt" aria-selected="false">JWT</a>
+              </li>
+            </ul>
+          <div class="tab-content" id="myTabContent">
+            <div class="tab-pane fade show active" id="base64" role="tabpanel">
+                <div class="row">
+                    <div class="col col-md-5 textarea">
+                        <h3>Plain text</h3>
+                        <textarea class="code plain"></textarea>
+                        <button class="btn btn-sm btn-outline-secondary copy">copy</button>
+                    </div>
+                    <div class="col col-md-2 col-tools">
+                        <button class="btn btn-outline-secondary encode">&rarr;</button>
+                        <button class="btn btn-outline-secondary decode">&larr;</button>
+                        <button class="btn btn-outline-secondary clear">clear</button>
+                    </div>
+                    <div class="col col-md-5 textarea">
+                        <h3>Base64</h3>
+                        <textarea class="code encoded"></textarea>
+                        <button class="btn btn-sm btn-outline-secondary copy">copy</button>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="jsonyaml" role="tabpanel">
+                <div class="row ">
+                    <div class="col col-md-5 textarea">
+                        <h3>YAML</h3>
+                        <textarea class="code plain"></textarea>
+                        <button class="btn btn-sm btn-outline-secondary copy">copy</button>
+                    </div>
+                    <div class="col col-md-2 col-tools">
+                        <button class="btn btn-outline-secondary encode">&rarr;</button>
+                        <button class="btn btn-outline-secondary decode">&larr;</button>
+                        <button class="btn btn-outline-secondary clear">clear</button>
+                    </div>
+                    <div class="col col-md-5 textarea">
+                        <h3>JSON</h3>
+                        <textarea class="code encoded"></textarea>
+                        <button class="btn btn-sm btn-outline-secondary copy">copy</button>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="jwt" role="tabpanel">
+                <div class="row ">
+                    <div class="col col-md-5 textarea">
+                        <h3>JWT</h3>
+                        <textarea class="code encoded"></textarea>
+                        <button class="btn btn-sm btn-outline-secondary copy">copy</button>
+                    </div>
+                    <div class="col col-md-2 col-tools">
+                        <button class="btn btn-outline-secondary decode">&rarr;</button>
+                        <button class="btn btn-outline-secondary clear">clear</button>
+                    </div>
+                    <div class="col col-md-5">
+                        <div class="textarea">
+                            <h3>Header</h3>
+                            <textarea class="code header small" readonly></textarea>
+                            <button class="btn btn-sm btn-outline-secondary copy">copy</button>
+                        </div>
+                        <div class="textarea">
+                            <h3>Payload</h3>
+                            <textarea class="code payload small" readonly></textarea>
+                            <button class="btn btn-sm btn-outline-secondary copy">copy</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+          </div>
+
+    </div>
+  </div>
+
+</main>
+<!-- JavaScript Bundle with Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>
+
+
+<script>
+$(document).ready(function() {
+    var hash = window.location.hash;
+    hash && $('ul.nav a[href="' + hash + '"]').tab('show');
+    $('.nav-tabs a').on("click", function(e) {
+        $(this).tab('show');
+        var scrollmem = $('body').scrollTop() || $('html').scrollTop();
+        window.location.hash = this.hash;
+        $('html,body').scrollTop(scrollmem);
+    });
+
+    let handleFinalize = (scope) => {
+        $(".exception").html("");
+    }
+    let handleException = (scope, message) => {
+        // escape
+        message = $("<div>").text(message).html();
+        $(".exception").html('<div class="alert alert-danger alert-dismissible fade show" role="alert">' + message + '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>')
+    }
+
+    $(".exception").on("click", ".alert-dismissible button.btn-close", () => {
+        handleFinalize(null);
+    });
+
+    let createEncodeDecodeScope = (scope, encodeCallback, decodeCallback) => {
+        let encode = () => {
+            try {
+                scope.find("textarea.encoded").val("");
+                let content = scope.find("textarea.plain").val();
+                if (content == "") {
+                    return
+                }
+                scope.find("textarea.encoded").val(encodeCallback(content));
+                handleFinalize(scope)
+            } catch(e) {
+                handleException(scope, e)   
+            }
+        }
+        
+        let decode = () => {
+            try {
+                scope.find("textarea.plain").val("");
+                let content = scope.find("textarea.encoded").val();
+                if (content == "") {
+                    return
+                }
+                scope.find("textarea.plain").val(decodeCallback(content));
+                handleFinalize(scope)
+            } catch(e) {
+                handleException(scope, e)   
+            }
+        }
+
+        let copyToClipboard = (event) => {
+            let textarea = $(event.target).parent().find("textarea");
+            textarea.select();
+            document.execCommand("copy");
+        }
+
+        let clear = (event) => {
+            scope.find("textarea").val("");
+        }
+
+        scope.find("button.clear").on("click", clear);
+        scope.find("button.encode").on("click", encode);
+        scope.find("button.decode").on("click", decode);
+        scope.find("textarea.plain").on("change", encode);
+        scope.find("textarea.encoded").on("change", decode);
+
+        scope.find("button.copy").on("click", copyToClipboard);
+
+    };
+
+    createEncodeDecodeScope(
+        $("#base64"),
+        // encode
+        (val) => {
+            return btoa(val);
+        },
+        // decode
+        (val) => {
+            return atob(val);
+        }
+    );
+
+    createEncodeDecodeScope(
+        $("#jsonyaml"),
+        // encode
+        (val) => {
+            let ret = jsyaml.load(val, "utf8");
+            return JSON.stringify(ret, null, 2);
+        },
+        // decode
+        (val) => {
+            let ret = $.parseJSON(val);
+            return jsyaml.dump(ret);
+        }
+    );
+
+    createEncodeDecodeScope(
+        $("#jwt"),
+        // encode
+        (val) => {
+            throw "not implemented"
+        },
+        // decode
+        (val) => {
+            let header = JSON.parse(atob(val.split('.')[0]));
+            let payload = JSON.parse(atob(val.split('.')[1]));
+
+            $("#jwt").find("textarea.header").val(JSON.stringify(header, null, 2));
+            $("#jwt").find("textarea.payload").val(JSON.stringify(payload, null, 2));
+            return null;
+        }
+    );
+});
+</script>
+      
+</body>
+</html>
