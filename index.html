@@ -558,6 +558,21 @@ $(document).ready(function() {
                     }
                 });
             }
+
+            if (pem.attributes) {
+                $.each(pem.attributes, (key, attribute) => {
+                    if (attribute.name === "extensionRequest" && attribute.extensions) {
+                        $.each(attribute.extensions, (subkey, subattribute) => {
+                            if (subattribute.name === "subjectAltName" && subattribute.altNames) {
+                                $.each(subattribute.altNames, (key, san) => {
+                                    summary.san.push(san.value);
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+
             if (pem.extensions) {
                 $.each(pem.extensions, (key, attribute) => {
                     if (attribute.name === "subjectAltName") {
