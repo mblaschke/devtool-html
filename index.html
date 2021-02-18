@@ -538,15 +538,19 @@ $(document).ready(function() {
                 subject: {},
                 issuer: {},
                 san: [],
-                validity: pem.validity,
+                validity: {},
             }
 
-            if (summary.validity.notBefore) {
-                summary.validity.notBeforeDuration = moment(summary.validity.notBefore).fromNow();
-            }
+            if (pem.validity) {
+                summary.validity = pem.validity;
+                
+                if (summary.validity.notBefore) {
+                    summary.validity.notBeforeDuration = moment(summary.validity.notBefore).fromNow();
+                }
 
-            if (summary.validity.notAfter) {
-                summary.validity.notAfterDuration = moment(summary.validity.notAfter).fromNow();
+                if (summary.validity.notAfter) {
+                    summary.validity.notAfterDuration = moment(summary.validity.notAfter).fromNow();
+                }
             }
 
             if (pem.issuer && pem.issuer.attributes) {
