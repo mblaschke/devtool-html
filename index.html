@@ -188,6 +188,13 @@
                     <div class="col col-md-2 col-tools">
                         <button class="btn btn-outline-secondary decode">&rarr;</button>
                         <button class="btn btn-outline-secondary clear">clear</button>
+
+                        <div class="form-control">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input base64switch" type="checkbox" id="jwtBase64" value="1">
+                                <label class="form-check-label" for="jwtBase64">as Base64</label>
+                            </div>
+                        </div>
                     </div>
                     <div class="col col-md-5">
                         <div class="textarea">
@@ -223,7 +230,7 @@
 
                         <div class="form-control">
                             <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" id="tlsCertBase64" value="1">
+                                <input class="form-check-input base64switch" type="checkbox" id="tlsCertBase64" value="1">
                                 <label class="form-check-label" for="tlsCertBase64">as Base64</label>
                             </div>
                         </div>
@@ -485,6 +492,10 @@ $(document).ready(function() {
         },
         // decode
         (val) => {
+            if (jwtScope.find(".base64switch:checkbox").is(":checked")) {
+                val = atob(val);
+            }
+
             let header = JSON.parse(atob(val.split('.')[0]));
             let payload = JSON.parse(atob(val.split('.')[1]));
 
@@ -504,7 +515,7 @@ $(document).ready(function() {
         },
         // decode
         (val) => {
-            if (certPemScope.find("#tlsCertBase64").is(":checked")) {
+            if (certPemScope.find(".base64switch:checkbox").is(":checked")) {
                 val = atob(val);
             }
 
@@ -543,7 +554,7 @@ $(document).ready(function() {
 
             if (pem.validity) {
                 summary.validity = pem.validity;
-                
+
                 if (summary.validity.notBefore) {
                     summary.validity.notBeforeDuration = moment(summary.validity.notBefore).fromNow();
                 }
